@@ -1,0 +1,200 @@
+<!-- Login Screen -->
+<div *ngIf="!isLoggedIn" id="login" class="fixed inset-0 z-50 flex items-center justify-center bg-[#00a884]">
+  <div class="bg-white p-6 md:p-10 rounded-lg shadow-2xl max-w-md w-full animate-fade-in text-center mx-4">
+    <div class="mb-6">
+      <div class="w-20 h-20 bg-[#25d366] rounded-full mx-auto flex items-center justify-center shadow-lg">
+        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.94 3.659 1.437 5.634 1.437h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+      </div>
+    </div>
+    <h2 class="text-2xl font-bold mb-4 text-gray-800">WhatsApp Chat</h2>
+    <p class="text-gray-600 mb-6">Enter your name to start chatting</p>
+    <input type="text" [(ngModel)]="username" placeholder="Your Name" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-[#00a884] outline-none">
+    <button (click)="login()" class="w-full bg-[#00a884] text-white py-3 rounded-lg font-bold hover:bg-[#008f70] transition shadow-lg">Start Chatting</button>
+  </div>
+</div>
+
+<!-- Chat Screen -->
+<div *ngIf="isLoggedIn" id="chat" class="flex h-[100dvh] max-w-[1600px] mx-auto bg-white md:shadow-2xl overflow-hidden">
+  <!-- Sidebar -->
+  <div id="sidebar" 
+       class="w-full md:w-1/3 min-w-[300px] border-r flex flex-col bg-white md:flex"
+       [class.hidden]="selectedUser">
+    <!-- Profile Header -->
+    <div class="h-[60px] bg-[#f0f2f5] flex items-center justify-between px-4 py-2">
+      <div id="my-avatar" class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold" [title]="username">
+        {{ getAvatarInitial(username) }}
+      </div>
+      <div class="flex space-x-4 text-gray-500">
+        <svg class="w-6 h-6 cursor-pointer" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/></svg>
+        <svg class="w-6 h-6 cursor-pointer" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </div>
+    </div>
+    
+    <!-- Search -->
+    <div class="bg-white p-2">
+      <div class="bg-[#f0f2f5] flex items-center px-4 py-1.5 rounded-lg">
+        <svg class="w-4 h-4 text-gray-500 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search or start new chat" class="bg-transparent border-none outline-none text-sm w-full py-1">
+      </div>
+    </div>
+
+    <!-- Online Users List -->
+    <div id="online-list" class="flex-1 overflow-y-auto scrollbar-thin">
+      <div *ngFor="let user of displayedUsers" 
+           (click)="selectUser(user)"
+           class="flex items-center px-4 py-3 hover:bg-[#f5f6f6] cursor-pointer border-b border-gray-100"
+           [class.bg-[#ebebeb]]="selectedUser === user">
+        <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold mr-4 flex-shrink-0 relative">
+          {{ getAvatarInitial(user) }}
+          <!-- Online Indicator Dot -->
+          <div *ngIf="isOnline(user)" class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between items-baseline">
+            <h5 class="font-semibold text-[#111b21] truncate">{{ user }}</h5>
+            <span *ngIf="isOnline(user)" class="text-[10px] text-green-600 font-medium">online</span>
+          </div>
+          <p class="text-xs text-gray-500 truncate">
+            {{ lastMessages[user] || 'Hey there! I am using WhatsApp.' }}
+          </p>
+        </div>
+      </div>
+      <div *ngIf="displayedUsers.length === 0" class="p-8 text-center text-gray-400 text-sm">
+        No chats found
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Chat Area -->
+  <div id="chat-area" 
+       class="flex-1 flex flex-col bg-[#e5ddd5] relative md:flex"
+       [class.hidden]="!selectedUser">
+    <!-- Chat Header -->
+    <div *ngIf="selectedUser" id="chat-header" class="h-[60px] bg-[#f0f2f5] flex items-center justify-between px-4 border-b border-gray-300">
+      <div class="flex items-center space-x-3 cursor-pointer">
+        <!-- Back button for mobile -->
+        <button (click)="backToSidebar()" class="md:hidden p-1 mr-2 hover:bg-gray-200 rounded-full">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+
+        <div id="header-avatar" class="w-10 h-10 bg-[#667eea] rounded-full flex items-center justify-center text-white font-bold">
+          {{ getAvatarInitial(selectedUser) }}
+        </div>
+        <div>
+          <h4 id="header-name" class="font-semibold text-gray-800">{{ selectedUser }}</h4>
+          <p id="header-status" class="text-xs text-gray-500">online</p>
+        </div>
+      </div>
+      <div class="flex space-x-2 md:space-x-5 text-gray-500 flex-shrink-0">
+        <svg class="w-5 h-5 cursor-pointer" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <svg class="w-5 h-5 cursor-pointer" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div id="messages" class="flex-1 p-4 md:p-8 overflow-y-auto chat-wallpaper flex flex-col space-y-2 scrollbar-thin">
+      <div *ngIf="!selectedUser" class="flex flex-col items-center justify-center h-full text-gray-500">
+        <div class="bg-white/80 px-6 py-2 rounded-full text-sm shadow-sm mb-4">
+          Welcome to WhatsApp Clone
+        </div>
+        <p class="text-sm">Select a user from the sidebar to start chatting</p>
+      </div>
+
+      <div *ngFor="let msg of messages; trackBy: trackByMsgId" 
+           class="flex w-full mb-1 group px-2" 
+           [class.justify-end]="msg.sender === username"
+           [class.justify-start]="msg.sender !== username">
+        <div class="relative px-3 py-1.5 rounded-lg shadow-sm text-sm max-w-[85%] min-w-[120px] transition-all duration-200"
+             [class.bg-[#dcf8c6]]="msg.sender === username"
+             [class.rounded-tr-none]="msg.sender === username"
+             [class.bg-white]="msg.sender !== username"
+             [class.rounded-tl-none]="msg.sender !== username">
+          
+          <!-- Forwarded Tag -->
+          <div *ngIf="msg.isForwarded" class="text-[10px] italic text-gray-500 flex items-center mb-1">
+            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L22 12L12 22V17H2V7H12V2Z"/></svg>
+            Forwarded
+          </div>
+
+          <p class="text-[#111b21] leading-relaxed whitespace-pre-wrap pr-10">{{ msg.message }}</p>
+          
+          <div class="flex items-center justify-end space-x-1 mt-1">
+            <span *ngIf="msg.isEdited" class="text-[10px] text-gray-400 italic">edited</span>
+            <span class="text-[10px] text-gray-500">{{ formatTime(msg.timestamp) }}</span>
+            <svg *ngIf="msg.sender === username" class="w-3.5 h-3.5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>
+          </div>
+
+          <!-- Message Actions (Inside bubble, top right) -->
+          <div class="absolute top-1 right-1 hidden group-hover:flex space-x-1 bg-white/80 backdrop-blur-sm rounded-md shadow-sm p-0.5 z-[20]">
+            <button *ngIf="msg.sender === username" (click)="editMessage(msg)" title="Edit" class="p-1 hover:bg-black/5 rounded transition-colors">
+              <svg class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            </button>
+            <button (click)="openForwardModal(msg)" title="Forward" class="p-1 hover:bg-black/5 rounded transition-colors">
+              <svg class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L22 12L12 22V17H2V7H12V2Z"/></svg>
+            </button>
+            <button *ngIf="msg.sender === username" (click)="deleteMessage(msg)" title="Delete" class="p-1 hover:bg-red-50 rounded transition-colors">
+              <svg class="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Input -->
+    <div *ngIf="selectedUser" id="input-area" class="bg-[#f0f2f5] p-3 flex flex-col border-t border-gray-200">
+      <!-- Edit Indicator -->
+      <div *ngIf="editingMessage" class="flex items-center justify-between px-4 py-2 bg-gray-200 rounded-t-lg text-xs text-gray-600 border-l-4 border-green-500 mb-1">
+        <div class="flex flex-col truncate">
+          <span class="font-bold text-green-600">Editing Message</span>
+          <span class="truncate opacity-70">{{ editingMessage.message }}</span>
+        </div>
+        <button (click)="cancelEdit()" class="p-1 hover:bg-gray-300 rounded-full">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <input type="text" [(ngModel)]="messageInput" [placeholder]="editingMessage ? 'Update message...' : 'Type a message'" (keypress)="($event.key === 'Enter') ? sendMessage() : null" class="flex-1 min-w-0 bg-white border-none rounded-lg px-3 md:px-4 py-2 md:py-2.5 outline-none text-sm shadow-sm">
+        <button (click)="sendMessage()" id="sendBtn" class="p-2 text-gray-500 hover:text-[#00a884] transition flex-shrink-0">
+          <svg *ngIf="!editingMessage" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+          <svg *ngIf="editingMessage" class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div *ngIf="toastMessage" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] animate-fade-in">
+  <div class="bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl text-sm font-medium flex items-center space-x-2">
+    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    <span>{{ toastMessage }}</span>
+  </div>
+</div>
+
+<!-- Forward Modal -->
+<div *ngIf="showUserListModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[80vh]">
+    <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-[#f0f2f5]">
+      <h3 class="font-bold text-gray-800">Forward to...</h3>
+      <button (click)="showUserListModal = false" class="p-1 hover:bg-gray-200 rounded-full">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+    <div class="overflow-y-auto p-2">
+      <div *ngFor="let user of onlineUsers" (click)="forwardMessage(user)" class="flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-lg border-b border-gray-50 last:border-none">
+        <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold mr-3">
+          {{ getAvatarInitial(user) }}
+        </div>
+        <span class="font-medium text-gray-800">{{ user }}</span>
+      </div>
+      <div *ngIf="onlineUsers.length === 0" class="p-8 text-center text-gray-500 italic">
+        No other users online to forward
+      </div>
+    </div>
+  </div>
+</div>
